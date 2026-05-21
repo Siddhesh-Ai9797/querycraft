@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Data (too large for git)
+data/
+
+# Model weights (goes on HuggingFace Hub instead)
+models/
+*.bin
+*.safetensors
+*.pt
+
+# HuggingFace cache
+.cache/
+
+# VS Code
+.vscode/
+
+# Conda
+*.egg-info/
