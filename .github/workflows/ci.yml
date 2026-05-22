@@ -1,0 +1,63 @@
+# .github/workflows/ci.yml
+
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install fastapi uvicorn pydantic httpx
+          pip install transformers==4.44.2 peft==0.12.0
+          pip install accelerate datasets sentencepiece protobuf
+          pip install tf-keras huggingface_hub
+          pip install ruff pytest
+
+      - name: Lint with ruff
+        run: ruff check src/ tests/
+
+      - name: Run tests
+        env:
+          MOCK_MODEL: "true"
+          PYTHONPATH: "."
+        run: pytest tests/ -v
+
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: test      # Only build if tests pass
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t querycraft:latest .
+
+      - name: Test container health
+        run: |
+          docker run -d \
+            --name querycraft-test \
+            -e MOCK_MODEL=true \
+            -p 8000:8000 \
+            querycraft:latest
+          sleep 10
+          curl -f http://localhost:8000/health
+          docker stop querycraft-test
