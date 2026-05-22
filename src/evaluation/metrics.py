@@ -1,6 +1,4 @@
 # src/evaluation/metrics.py
-
-import re
 from src.evaluation.sql_executor import normalize_sql, execute_sql
 
 

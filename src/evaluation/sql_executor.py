@@ -2,7 +2,6 @@
 
 import sqlite3
 import re
-from typing import Optional
 
 
 def normalize_sql(sql: str) -> str:

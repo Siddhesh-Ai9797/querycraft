@@ -1,7 +1,7 @@
 # src/evaluation/evaluator.py
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 from tqdm import tqdm
 from src.data.sql_loader import load_sql_data

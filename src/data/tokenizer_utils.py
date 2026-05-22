@@ -82,6 +82,6 @@ def get_token_length_stats(
         "p50":          lengths[n // 2],
         "p90":          lengths[int(n * 0.90)],
         "p95":          lengths[int(n * 0.95)],
-        "over_512":     sum(1 for l in lengths if l > 512),
-        "over_512_pct": round(sum(1 for l in lengths if l > 512) / n * 100, 1),
+        "over_512":     sum(1 for length in lengths if length > 512),
+        "over_512_pct": round(sum(1 for length in lengths if length > 512) / n * 100, 1),
     }

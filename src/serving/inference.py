@@ -2,7 +2,7 @@
 
 import os
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 from src.data.prompt_formatter import format_inference_prompt
 from src.training.model_loader import MODEL_NAME, get_bnb_config
