@@ -17,7 +17,9 @@ RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir \
+    --extra-index-url https://download.pytorch.org/whl/cu128 \
+    -r requirements.txt
 
 FROM nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04
 
