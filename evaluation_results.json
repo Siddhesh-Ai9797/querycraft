@@ -1,0 +1,14 @@
+{
+  "base": {
+    "exact_match_pct": 0.0,
+    "mean_bleu": 55.79,
+    "execution_accuracy_pct": 84.0,
+    "n_examples": 50
+  },
+  "finetuned": {
+    "exact_match_pct": 82.0,
+    "mean_bleu": 96.42,
+    "execution_accuracy_pct": 96.0,
+    "n_examples": 50
+  }
+}
