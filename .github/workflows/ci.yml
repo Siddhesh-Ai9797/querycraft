@@ -58,6 +58,14 @@ jobs:
             -e MOCK_MODEL=true \
             -p 8000:8000 \
             querycraft:latest
-          sleep 10
-          curl -f http://localhost:8000/health
+
+          for i in {1..30}; do
+            if curl -f http://localhost:8000/health 2>/dev/null; then
+              echo "Container is healthy"
+              break
+            fi
+            echo "Waiting for container... (attempt $i/30)"
+            sleep 2
+          done
+
           docker stop querycraft-test
