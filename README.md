@@ -162,38 +162,6 @@ All 5 tests run without a GPU using the mock model flag.
 
 ---
 
-## Project Structure
-querycraft/
-├── src/
-│   ├── data/
-│   │   ├── sql_loader.py          # Dataset loading and train/val split
-│   │   ├── prompt_formatter.py    # Alpaca prompt template
-│   │   └── tokenizer_utils.py     # Phi-3 tokenizer wrapper
-│   ├── training/
-│   │   ├── model_loader.py        # 4-bit model loading + LoRA injection
-│   │   ├── train_config.py        # LoRA and training hyperparameters
-│   │   └── trainer.py             # SFTTrainer training loop
-│   ├── evaluation/
-│   │   ├── sql_executor.py        # In-memory SQLite execution
-│   │   ├── metrics.py             # Exact match, BLEU, execution accuracy
-│   │   └── evaluator.py           # Base vs fine-tuned comparison
-│   └── serving/
-│       ├── app.py                 # FastAPI application
-│       └── inference.py           # Model loading and SQL generation
-├── scripts/
-│   ├── train.py                   # Training entry point (--smoke-test flag)
-│   ├── run_eval.py                # Evaluation entry point
-│   └── upload_model.py            # HuggingFace Hub upload
-├── demo/
-│   └── streamlit_app.py           # Streamlit demo UI
-├── tests/
-│   └── test_api.py                # FastAPI unit tests
-├── .github/workflows/
-│   └── ci.yml                     # GitHub Actions CI/CD pipeline
-├── Dockerfile                     # Multi-stage CUDA Docker build
-├── requirements.txt
-└── evaluation_results.json        # Saved evaluation metrics
-
 ## Links
 
 - **HuggingFace Model:** https://huggingface.co/Sid9797/querycraft-phi3-sql
