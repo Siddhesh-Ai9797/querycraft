@@ -166,6 +166,7 @@ All 5 tests run without a GPU using the mock model flag.
 
 - **HuggingFace Model:** https://huggingface.co/Sid9797/querycraft-phi3-sql
 - **GitHub:** https://github.com/Siddhesh-Ai9797/querycraft
+- **Production system:** [QueryCraft Enterprise](https://github.com/Siddhesh-Ai9797/querycraft-enterprise), the multi agent platform that serves this model with validation, RAG and monitoring
 - **Training Dataset:** https://huggingface.co/datasets/b-mc2/sql-create-context
 - **Base Model:** https://huggingface.co/microsoft/Phi-3-mini-4k-instruct
 
