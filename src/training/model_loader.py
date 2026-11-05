@@ -1,10 +1,10 @@
 # src/training/model_loader.py
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-from src.training.train_config import LoRAConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
+from src.training.train_config import LoRAConfig
 
 MODEL_NAME = "microsoft/Phi-3-mini-4k-instruct"
 

@@ -27,7 +27,7 @@ jobs:
           pip install fastapi uvicorn pydantic httpx
           pip install transformers==4.44.2 peft==0.12.0
           pip install accelerate datasets sentencepiece protobuf
-          pip install tf-keras huggingface_hub
+          pip install tf-keras "huggingface_hub>=0.23.2,<1.0"
           pip install ruff pytest
 
       - name: Lint with ruff

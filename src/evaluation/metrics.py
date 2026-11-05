@@ -1,6 +1,5 @@
 # src/evaluation/metrics.py
-from src.evaluation.sql_executor import normalize_sql, execute_sql
-
+from src.evaluation.sql_executor import execute_sql, normalize_sql
 
 # Load BLEU metric from HuggingFace evaluate library
 # This downloads a small metric file on first call

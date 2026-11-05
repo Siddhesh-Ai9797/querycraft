@@ -9,10 +9,12 @@ These run in GitHub Actions CI on every push.
 # tests/test_api.py
 
 import os
+
 os.environ["MOCK_MODEL"] = "true"
 
 import pytest
 from fastapi.testclient import TestClient
+
 from src.serving.app import app
 
 

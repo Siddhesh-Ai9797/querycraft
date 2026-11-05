@@ -1,7 +1,7 @@
 # src/evaluation/sql_executor.py
 
-import sqlite3
 import re
+import sqlite3
 
 
 def normalize_sql(sql: str) -> str:
@@ -69,7 +69,7 @@ def execute_sql(sql: str, schema_context: str) -> dict:
             "rows": len(rows),
         }
 
-    except Exception as e:
+    except (sqlite3.Error, ValueError) as e:
         return {
             "success": False,
             "error": str(e),

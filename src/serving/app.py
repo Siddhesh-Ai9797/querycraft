@@ -1,10 +1,11 @@
 # src/serving/app.py
 
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from src.serving.inference import generator
 
+from src.serving.inference import generator
 
 # --- Request and Response Models ---
 

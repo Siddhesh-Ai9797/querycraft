@@ -21,3 +21,4 @@ models/
 
 # Conda
 *.egg-info/
+.DS_Store
