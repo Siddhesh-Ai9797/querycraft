@@ -1,176 +1,118 @@
-# QueryCraft — Fine-Tuned LLM for Text-to-SQL
+# QueryCraft
 
-![CI](https://github.com/Siddhesh-Ai9797/querycraft/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/Siddhesh-Ai9797/querycraft/actions/workflows/ci.yml/badge.svg)](https://github.com/Siddhesh-Ai9797/querycraft/actions/workflows/ci.yml)
 
-Fine-tuned **Phi-3 Mini 3.8B** using **QLoRA** on 76,000 Text-to-SQL examples.
-Exact match accuracy improved from **0% → 82%** on a held-out validation set.
-Served via a **FastAPI** inference endpoint, containerised with **Docker**,
-and deployed with a **GitHub Actions** CI/CD pipeline.
+Phi-3 Mini fine tuned to turn plain English questions into SQL. Using QLoRA, I trained only 0.23% of the model's parameters on one 8 GB consumer GPU in about 3 hours. Exact match accuracy went from 0% to 82%. The model is published on Hugging Face and served through a FastAPI endpoint in Docker.
 
----
+This is the model behind [QueryCraft Enterprise](https://github.com/Siddhesh-Ai9797/querycraft-enterprise), the multi agent platform that adds table search, SQL safety checks and monitoring.
 
 ## Results
 
-| Metric | Base Model | Fine-Tuned | Improvement |
+Evaluated on 50 held out examples the model never saw in training.
+
+| Metric | Base Phi-3 Mini | Fine tuned | Change |
 |---|---|---|---|
-| Exact Match | 0.0% | 82.0% | +82 pts |
-| Execution Accuracy | 84.0% | 96.0% | +12 pts |
-| BLEU Score | 55.79 | 96.42 | +40.63 pts |
+| Exact match | 0.0% | **82.0%** | +82 points |
+| Execution accuracy | 84.0% | **96.0%** | +12 points |
+| BLEU | 55.79 | **96.42** | +40.6 |
 
-Evaluated on 50 held-out validation examples not seen during training.
+Exact match checks that the SQL text matches the answer after normalizing case and spaces. Execution accuracy checks that the SQL actually runs against the given schema in SQLite.
 
----
+## How it works
 
-## What It Does
-
-Send a natural language question and a database schema — get back a valid SQL query.
-
-**Input:**
-```json
-{
-  "question": "How many employees are in the sales department?",
-  "context": "CREATE TABLE employees (id INTEGER, name VARCHAR, department VARCHAR)"
-}
+```mermaid
+flowchart LR
+    D[sql-create-context, 76,577 examples] --> P[Prompt template]
+    P --> T[Tokenize, 256 tokens, packed]
+    T --> Q[QLoRA: 4-bit NF4 base + LoRA r=16]
+    Q --> A[LoRA adapter]
+    A --> H[Hugging Face Hub]
+    A --> E[Evaluation: exact match, execution, BLEU]
+    A --> S[FastAPI in Docker]
 ```
 
-**Output:**
-```json
-{
-  "sql": "SELECT COUNT(*) FROM employees WHERE department = 'sales'",
-  "question": "How many employees are in the sales department?",
-  "context": "CREATE TABLE employees (id INTEGER, name VARCHAR, department VARCHAR)"
-}
-```
-
----
+1. **Format.** Each example has a question, a CREATE TABLE schema and the answer SQL. They are put into one instruction style prompt.
+2. **Quantize.** The 3.8B base model loads in 4-bit NF4 with double quantization, so it fits in 8 GB of GPU memory.
+3. **Train adapters.** LoRA adapters with rank 16 and alpha 32 are added to the attention and feed forward layers. Only these 8.9M parameters train, for one epoch with an effective batch size of 16.
+4. **Evaluate.** The same harness runs the base and tuned models on held out examples and compares exact match, execution accuracy and BLEU.
+5. **Serve.** FastAPI loads the base model plus the adapter. A mock mode lets the API and its tests run without a GPU.
 
 ## Model
 
 | Property | Value |
 |---|---|
-| Base model | microsoft/Phi-3-mini-4k-instruct (3.8B) |
-| Fine-tuning method | QLoRA (4-bit NF4 quantization + LoRA r=16) |
-| Trainable parameters | 8,912,896 (0.23% of total) |
-| Training dataset | b-mc2/sql-create-context (76,577 examples) |
-| Training hardware | NVIDIA RTX 5060 Ti 8GB (Blackwell) |
+| Base model | microsoft/Phi-3-mini-4k-instruct, 3.8B |
+| Method | QLoRA, 4-bit NF4 with LoRA rank 16 |
+| Trainable parameters | 8,912,896, which is 0.23% of the model |
+| Dataset | b-mc2/sql-create-context, 76,577 examples |
+| Hardware | NVIDIA RTX 5060 Ti, 8 GB |
 | Training time | 3 hours 2 minutes |
-| Final train loss | 0.5677 |
+| Final training loss | 0.5677 |
 
-Adapter weights on HuggingFace Hub:
-**[Sid9797/querycraft-phi3-sql](https://huggingface.co/Sid9797/querycraft-phi3-sql)**
+Adapter weights: **[Sid9797/querycraft-phi3-sql](https://huggingface.co/Sid9797/querycraft-phi3-sql)**
 
----
+## Tech stack
 
-## Architecture
-Dataset (76K examples)
-↓
-Prompt Formatter (Alpaca template)
-↓
-Tokenizer (Phi-3 Mini, MAX_LENGTH=256, packing enabled)
-↓
-QLoRA Fine-Tuning (bitsandbytes 4-bit + PEFT LoRA + TRL SFTTrainer)
-↓
-LoRA Adapter (saved to HuggingFace Hub)
-↓
-Evaluation Harness (Exact Match / Execution Accuracy / BLEU)
-↓
-FastAPI Inference Server → Docker Container → GitHub Actions CI/CD
+| Area | Tools |
+|---|---|
+| Training | PyTorch, Transformers, PEFT, TRL, bitsandbytes |
+| Evaluation | SQLite execution checks, BLEU |
+| Serving | FastAPI, Pydantic, Docker, Streamlit demo |
+| MLOps | Hugging Face Hub, GitHub Actions, Ruff, pytest |
 
----
+## Project structure
 
-## Tech Stack
+```
+src/
+  data/          Dataset loading, prompt template, tokenizer setup
+  training/      QLoRA config, model loading, trainer
+  evaluation/    Exact match, execution accuracy and BLEU harness
+  serving/       FastAPI app and inference with a mock mode
+scripts/         Train, evaluate and upload to Hugging Face
+demo/            Streamlit demo
+tests/           API tests that run without a GPU
+```
 
-**ML/Training**
-- PyTorch 2.11 + CUDA 12.8
-- HuggingFace Transformers, PEFT, TRL, datasets
-- bitsandbytes (4-bit quantization)
-
-**Serving**
-- FastAPI + Uvicorn
-- Pydantic v2
-- Docker (multi-stage CUDA build)
-
-**MLOps**
-- GitHub Actions CI/CD (lint → test → build → health check)
-- HuggingFace Hub (model hosting)
-- Ruff (linting)
-- Pytest (unit tests with mock model)
-
----
-
-## Run Locally
-
-**Prerequisites:** Python 3.11, CUDA-capable GPU, conda
+## Running it
 
 ```bash
-git clone https://github.com/Siddhesh-Ai9797/querycraft.git
-cd querycraft
-conda activate ai-env
 pip install -r requirements.txt
+uvicorn src.serving.app:app --port 8000
 ```
 
-**Start the API server:**
-```bash
-python -m uvicorn src.serving.app:app --host 0.0.0.0 --port 8000
-```
-
-Visit `http://localhost:8000/docs` for the interactive Swagger UI.
-
-**Run with Docker (CPU/mock mode):**
-```bash
-docker build -t querycraft:latest .
-docker run -e MOCK_MODEL=true -p 8000:8000 querycraft:latest
-```
-
-**Run the Streamlit demo:**
-```bash
-streamlit run demo/streamlit_app.py
-```
-
----
-
-## API Reference
-
-### `GET /health`
-Returns server status and model readiness.
-
-```bash
-curl http://localhost:8000/health
-```
-
-### `POST /generate`
-Generate SQL from a natural language question.
+Then open http://localhost:8000/docs.
 
 ```bash
 curl -X POST http://localhost:8000/generate \
   -H "Content-Type: application/json" \
-  -d '{
-    "question": "What is the average salary by department?",
-    "context": "CREATE TABLE employees (id INTEGER, name VARCHAR, department VARCHAR, salary FLOAT)"
-  }'
+  -d '{"question": "What is the average salary by department?",
+       "context": "CREATE TABLE employees (id INTEGER, name VARCHAR, department VARCHAR, salary FLOAT)"}'
 ```
 
----
+The response holds the generated `sql` along with the question and schema you sent.
 
-## Run Tests
+Without a GPU, use mock mode in Docker:
+
+```bash
+docker build -t querycraft .
+docker run -e MOCK_MODEL=true -p 8000:8000 querycraft
+```
+
+To retrain and evaluate:
+
+```bash
+python scripts/train.py
+python scripts/run_eval.py
+```
+
+## Tests
 
 ```bash
 MOCK_MODEL=true PYTHONPATH=. pytest tests/ -v
 ```
 
-All 5 tests run without a GPU using the mock model flag.
+GitHub Actions lints with Ruff, runs the tests in mock mode, then builds the Docker image and checks that `/health` responds.
 
----
+## Author
 
-## Links
-
-- **HuggingFace Model:** https://huggingface.co/Sid9797/querycraft-phi3-sql
-- **GitHub:** https://github.com/Siddhesh-Ai9797/querycraft
-- **Production system:** [QueryCraft Enterprise](https://github.com/Siddhesh-Ai9797/querycraft-enterprise), the multi agent platform that serves this model with validation, RAG and monitoring
-- **Training Dataset:** https://huggingface.co/datasets/b-mc2/sql-create-context
-- **Base Model:** https://huggingface.co/microsoft/Phi-3-mini-4k-instruct
-
----
-
-*Built as part of an ML Engineer portfolio project.*
-*MS in Artificial Intelligence, DePaul University, Chicago.*
+Siddhesh Patil, MS in Artificial Intelligence, DePaul University
