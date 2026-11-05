@@ -1,9 +1,10 @@
 # src/training/trainer.py
 
 from datasets import Dataset
-from trl import SFTTrainer, SFTConfig
-from src.data.sql_loader import load_sql_data
+from trl import SFTConfig, SFTTrainer
+
 from src.data.prompt_formatter import format_training_example
+from src.data.sql_loader import load_sql_data
 from src.training.model_loader import load_model_and_tokenizer
 from src.training.train_config import LoRAConfig, TrainingConfig
 

@@ -1,12 +1,13 @@
 # src/evaluation/evaluator.py
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 from tqdm import tqdm
-from src.data.sql_loader import load_sql_data
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 from src.data.prompt_formatter import format_inference_prompt
-from src.evaluation.metrics import evaluate_single, aggregate_metrics
+from src.data.sql_loader import load_sql_data
+from src.evaluation.metrics import aggregate_metrics, evaluate_single
 from src.training.model_loader import MODEL_NAME, get_bnb_config
 
 

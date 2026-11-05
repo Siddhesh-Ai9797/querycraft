@@ -1,8 +1,8 @@
 # src/data/tokenizer_utils.py
 
 from transformers import AutoTokenizer
-from src.data.prompt_formatter import format_training_example
 
+from src.data.prompt_formatter import format_training_example
 
 MODEL_NAME = "microsoft/Phi-3-mini-4k-instruct"
 MAX_LENGTH = 512

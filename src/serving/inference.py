@@ -1,12 +1,13 @@
 # src/serving/inference.py
 
 import os
+
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 from src.data.prompt_formatter import format_inference_prompt
 from src.training.model_loader import MODEL_NAME, get_bnb_config
-
 
 # Read from environment variables so Docker can configure these
 ADAPTER_REPO = os.getenv(

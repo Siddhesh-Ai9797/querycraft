@@ -1,12 +1,12 @@
 # src/data/sql_loader.py
 
-from datasets import load_dataset, Dataset
-from typing import Optional
+
+from datasets import Dataset, load_dataset
 
 
 def load_sql_data(
     val_size: int = 2000,
-    max_train_samples: Optional[int] = None,
+    max_train_samples: int | None = None,
     seed: int = 42,
 ) -> tuple[list[dict], list[dict]]:
     """
